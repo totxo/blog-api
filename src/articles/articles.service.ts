@@ -2,8 +2,9 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
-  NotFoundException, UnauthorizedException
-} from "@nestjs/common";
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Article } from './entities/article.entity';
 import { Connection, Model } from 'mongoose';
@@ -12,6 +13,7 @@ import { CreateArticleDto } from './dtos/create-article.dto';
 import { UpdateArticleDto } from './dtos/update-article.dto';
 import { User } from '../auth/entities/user.entity';
 import { Comment } from '../comments/entities/comment.entity';
+import * as mongoose from 'mongoose';
 
 @Injectable()
 export class ArticlesService {
@@ -24,7 +26,12 @@ export class ArticlesService {
 
   async findAll(paginationQueryDto: PaginationQueryDto) {
     const { limit, offset } = paginationQueryDto;
-    return this.articleModel.find().skip(offset).limit(limit).exec();
+    return this.articleModel
+      .find()
+      .populate('user', 'username')
+      .skip(offset)
+      .limit(limit)
+      .exec();
   }
 
   async findAllByUsername(
@@ -38,12 +45,17 @@ export class ArticlesService {
     const { limit, offset } = paginationQueryDto;
     return this.articleModel
       .find({ user: userDB })
+      .populate('user', 'username')
       .skip(offset)
       .limit(limit)
       .exec();
   }
 
   async findOne(id: string) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new HttpException(`Id #${id} not is valid`, HttpStatus.BAD_REQUEST);
+    }
+
     const article = await this.articleModel
       .findOne({ _id: id })
       .populate('user', 'username')
@@ -68,16 +80,8 @@ export class ArticlesService {
     await article.save();
   }
 
-  // TODO: En el update solo poder acceder a los articulos del usuario
-
   async update(id: string, user: User, updateArticle: UpdateArticleDto) {
-
-    const existingArticle = await this.articleModel
-      .findOne({ _id: id }).exec();
-
-    if (!existingArticle) {
-      throw new HttpException(`Article #${id} not found`, HttpStatus.NOT_FOUND);
-    }
+    const existingArticle = await this.findOne(id);
 
     if (JSON.stringify(existingArticle.user._id) !== JSON.stringify(user._id)) {
       throw new UnauthorizedException();
@@ -89,12 +93,7 @@ export class ArticlesService {
   }
 
   async remove(id: string, user: User) {
-    const existingArticle = await this.articleModel
-      .findOne({ _id: id }).exec();
-
-    if (!existingArticle) {
-      throw new HttpException(`Article #${id} not found`, HttpStatus.NOT_FOUND);
-    }
+    const existingArticle = await this.findOne(id);
 
     if (JSON.stringify(existingArticle.user._id) !== JSON.stringify(user._id)) {
       throw new UnauthorizedException();

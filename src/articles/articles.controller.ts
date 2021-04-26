@@ -45,7 +45,6 @@ export class ArticlesController {
   @Post()
   @UsePipes(ValidationPipe)
   create(@Body() createArticle: CreateArticleDto, @GetUser() user: User) {
-    console.log(user);
     return this.articlesService.create(createArticle, user);
   }
 
