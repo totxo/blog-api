@@ -12,10 +12,7 @@ export class User extends Document {
   password: string;
   @Prop()
   salt: string;
-  /*
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Article' }] })
-  articles: Article[];
-  */
+
   async validatePassword(password: string): Promise<boolean> {
     const hash = await bcrypt.hash(password, this.salt);
     return hash === this.password;
