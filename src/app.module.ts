@@ -10,7 +10,7 @@ const mongoUri = process.env.MONGO_URI || dbConfig.uri
 @Module({
   imports: [
     ArticlesModule,
-    MongooseModule.forRoot(mongoUri),
+    MongooseModule.forRoot('mongodb+srv://admin:zS3iMVAZLhbp3en1@cluster0.ogfto.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'),
     AuthModule,
     CommentsModule,
   ],
