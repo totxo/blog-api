@@ -5,6 +5,9 @@ import { Connection, Model } from 'mongoose';
 import { InjectConnection, InjectModel } from "@nestjs/mongoose";
 import { JwtPayload } from './jwt-payload.interface';
 import { User } from './entities/user.entity';
+import * as config from 'config';
+const jwtConfig = config.get('jwt');
+const secret = process.env.SECRET || jwtConfig.secret;
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -14,7 +17,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: '53CR37',
+      secretOrKey: secret,
     });
   }
 

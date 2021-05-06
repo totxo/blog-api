@@ -1,0 +1,9 @@
+server:
+  port: 3000
+
+db:
+  uri: 'mongodb://localhost:27017/blog_db'
+
+jwt:
+  expiresIn: 3600
+  secret: '53CR37'

@@ -6,13 +6,17 @@ import { User, UserSchema } from './entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
+import * as config from 'config';
+const jwtConfig = config.get('jwt');
+const secret = process.env.SECRET || jwtConfig.secret;
+const expiresIn = process.env.EXPIRES_IN || jwtConfig.expiresIn
 
 @Module({
   imports: [
     JwtModule.register({
-      secret: '53CR37',
+      secret: secret,
       signOptions: {
-        expiresIn: 3600,
+        expiresIn: expiresIn,
       },
     }),
     PassportModule.register({ defaultStrategy: 'jwt' }),
